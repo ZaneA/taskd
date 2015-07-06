@@ -40,6 +40,9 @@ void _storage_debug_exec_result(storage_t *storage, char *sql)
     }
 }
 
+/**
+ * Print a bunch of tables to stdout for debugging. Pretty brutal.
+ */
 void storage_debug(storage_t *storage)
 {
     fprintf(stdout, "\n== plugins ==\n");
@@ -59,11 +62,15 @@ void storage_debug(storage_t *storage)
 }
 #endif
 
-// Returns a single column
+/**
+ * Takes the first column in row and shoves it into user buffer.
+ */
 int _storage_exec_result_callback(void *user, int columns, char **column_data, char **column_names)
 {
     (void)columns;
     (void)column_names;
+
+    assert(user != NULL);
 
     sprintf(user, "%s", column_data[0]);
 
@@ -96,6 +103,9 @@ void storage_shutdown()
     sqlite3_close(g_engine.storage.conn);
 }
 
+/**
+ * Helper for running an SQL query with a custom callback.
+ */
 void storage_exec_result_(storage_t *storage, void *user, int(*callback)(void*, int, char**, char**), const char *format, ...)
 {
     va_list args;
@@ -128,7 +138,7 @@ void storage_exec_result_(storage_t *storage, void *user, int(*callback)(void*, 
 }
 
 /**
- * Exec with result
+ * Simple SQL query exec returning the first column as a static buffer.
  */
 char* storage_exec_result(storage_t *storage, const char *format, ...)
 {
@@ -148,7 +158,7 @@ char* storage_exec_result(storage_t *storage, const char *format, ...)
 }
 
 /**
- * Exec with no result
+ * Exec that ignores result.
  */
 int storage_exec_noresult(storage_t *storage, const char *format, ...)
 {

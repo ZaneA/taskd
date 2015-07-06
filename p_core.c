@@ -5,6 +5,9 @@
 #include <time.h>
 #include <sys/utsname.h>
 
+/**
+ * Initialize plugin.
+ */
 int plugin_init(plugin_api_t *plugin_api)
 {
     // Only need to set these once so we do it during init
@@ -26,11 +29,17 @@ int plugin_init(plugin_api_t *plugin_api)
     return 1000; // Tick rate (update once per second)
 }
 
+/**
+ * Shutdown plugin.
+ */
 void plugin_shutdown(plugin_api_t *plugin_api)
 {
     (void)plugin_api;
 }
 
+/**
+ * Plugin tick.
+ */
 int plugin_tick(plugin_api_t *plugin_api)
 {
     // Set up some date variables
@@ -52,5 +61,6 @@ int plugin_tick(plugin_api_t *plugin_api)
         plugin_api->set("DATE_IS_DST", "%i", v.tm_isdst);
     }
 
+    // The return value how many milliseconds until tick should be called again.
     return 1000;
 }

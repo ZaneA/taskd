@@ -41,19 +41,19 @@ int main(int argc, char **argv)
     signal(SIGHUP, signal_handler); // Handle SIGHUP for debug printout
 
     // Config
-    const char *database = getenv("TASKERD_DATABASE");
-    const char *plugins = getenv("TASKERD_PLUGINS");
+    const char *database = getenv("TASKD_DATABASE");
+    const char *plugins = getenv("TASKD_PLUGINS");
 
     // Abort if no values are set (@todo or use defaults?)
     if (database == NULL || plugins == NULL) {
-        fprintf(stderr, "TASKERD_DATABASE, TASKERD_PLUGINS, and TASKERD_TICK_RATE must be defined in environment.\n");
+        fprintf(stderr, "TASKD_DATABASE, TASKD_PLUGINS, and TASKD_TICK_RATE must be defined in environment.\n");
         exit(1);
     }
 
     // Set the default tick rate
     // @todo set minimum and maximum tick rate to override plugins/tasks?
     // This is in nanoseconds
-    int tick_rate = atoi(getenv("TASKERD_TICK_RATE"));
+    int tick_rate = atoi(getenv("TASKD_TICK_RATE"));
 
     fprintf(stderr, "Initializing subsystems.\n");
 
@@ -88,10 +88,7 @@ int main(int argc, char **argv)
         // Call a tick function on plugins so they can set new variables if needed
         plugins_tick(&g_engine.plugins);
 
-        // @todo make this function "queue" tasks to be run
-        // This way we queue tasks on variable change instead of running them at that
-        // exact point in time and potentially screwing up program flow or getting into a loop.
-        // Might also be possible to run this stuff in a thread later this way.
+        // Queue profiles to be run
         profiles_queue(&g_engine.profiles, PROFILES_CONDITION_ALWAYS, NULL); // Run all "always" profiles
         profiles_queue(&g_engine.profiles, PROFILES_CONDITION_CUSTOM, NULL); // Maybe run "custom" profiles
 
@@ -100,7 +97,7 @@ int main(int argc, char **argv)
             storage_debug(&g_engine.storage);
         }
 
-        // @todo run the actual tasks here
+        // Run all the queued tasks here
         taskrunner_run_queued();
 
         // This should sleep exactly as long as requested for the next plugin to tick.

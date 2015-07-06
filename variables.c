@@ -43,6 +43,9 @@ char* variables_get(const char *key)
     return storage_exec_result(&g_engine.storage, "SELECT value FROM " _VARIABLES_TABLE " WHERE key = \"%s\" LIMIT 1", key);
 }
 
+/**
+ * Set a variable by key with formatted value.
+ */
 void variables_set(const char *key, const char *format, ...)
 {
     va_list args;
@@ -65,6 +68,6 @@ void variables_set(const char *key, const char *format, ...)
         key
     );
 
-    // @todo this should queue tasks instead of running them inline
+    // Queue these profiles as running them inline could break program flow
     profiles_queue(&g_engine.profiles, PROFILES_CONDITION_VARIABLE_CHANGED, key);
 }

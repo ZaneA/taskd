@@ -45,6 +45,10 @@ void profiles_shutdown()
 {
 }
 
+/**
+ * Handle profile task triggering logic.
+ * Debounces and handles enter/exit tasks.
+ */
 int _profiles_run_callback(void *user, int columns, char **column_data, char **column_names)
 {
     (void)columns;
@@ -103,6 +107,9 @@ int _profiles_run_callback(void *user, int columns, char **column_data, char **c
     return 0;
 }
 
+/**
+ * Find matching profiles to queue based on condition type and a custom parameter.
+ */
 int profiles_queue(profiles_t *profiles, int condition_type, const char *data)
 {
     (void)profiles;

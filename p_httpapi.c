@@ -9,10 +9,14 @@
 #include <sys/socket.h>
 #include <microhttpd.h>
 
+// @todo grab from environment
 #define PORT 8080
 
 static struct MHD_Daemon *mhd_daemon = NULL;
 
+/**
+ * Handle a client connection, best to check out the libmicrohttpd documentation for this one...
+ */
 int mhd_answer_to_connection(
     void *cls, struct MHD_Connection *connection,
     const char *url,
@@ -84,6 +88,9 @@ int mhd_answer_to_connection(
     return ret;
 }
 
+/**
+ * Initialize plugin.
+ */
 int plugin_init(plugin_api_t *plugin_api)
 {
     // Spin up HTTP server
@@ -96,6 +103,9 @@ int plugin_init(plugin_api_t *plugin_api)
     return 5000; // Tick rate (update once per second)
 }
 
+/**
+ * Shutdown plugin.
+ */
 void plugin_shutdown(plugin_api_t *plugin_api)
 {
     (void)plugin_api;
@@ -109,13 +119,12 @@ void plugin_shutdown(plugin_api_t *plugin_api)
     mhd_daemon = NULL;
 }
 
+/**
+ * Plugin tick.
+ */
 int plugin_tick(plugin_api_t *plugin_api)
 {
     (void)plugin_api;
-
-    // Tick webserver
-
-    // Handle various routes
 
     // /variables
     // /variables?key=BLAH&value=blah%20value
