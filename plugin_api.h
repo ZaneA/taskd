@@ -15,6 +15,8 @@ typedef int (*plugin_tick_func)(plugin_api_t *plugin_api);
 
 typedef struct {
     void* handle;
+    int tick_rate;
+    int last_run;
     plugin_init_func init;
     plugin_shutdown_func shutdown;
     plugin_tick_func tick;

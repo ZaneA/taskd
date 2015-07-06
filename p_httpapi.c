@@ -93,7 +93,7 @@ int plugin_init(plugin_api_t *plugin_api)
         return -1;
     }
 
-    return 1000; // Tick rate (update once per second)
+    return 5000; // Tick rate (update once per second)
 }
 
 void plugin_shutdown(plugin_api_t *plugin_api)
@@ -130,5 +130,5 @@ int plugin_tick(plugin_api_t *plugin_api)
     // /profiles
     // /profiles/add?name=Task%20Name&description=Here%20is%20a%20description&enter_task=Task%20Name&tick_task=&exit_task=&condition_type=2
 
-    return 0;
+    return 5000;
 }

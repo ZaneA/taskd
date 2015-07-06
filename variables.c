@@ -66,5 +66,5 @@ void variables_set(const char *key, const char *format, ...)
     );
 
     // @todo this should queue tasks instead of running them inline
-    profiles_run(&g_engine.profiles, PROFILES_CONDITION_VARIABLE_CHANGED, key);
+    profiles_queue(&g_engine.profiles, PROFILES_CONDITION_VARIABLE_CHANGED, key);
 }

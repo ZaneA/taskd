@@ -52,6 +52,15 @@ int taskrunner_init(taskrunner_t *taskrunner)
         ");"
     );
 
+    // Queued tasks table
+    storage_exec_noresult(
+        &g_engine.storage,
+        "CREATE TABLE IF NOT EXISTS " _QUEUED_TASKS_TABLE
+        "("
+            "script TEXT"
+        ");"
+    );
+
     taskrunner->lua = luaL_newstate();
     luaL_openlibs(taskrunner->lua);
 
@@ -106,18 +115,25 @@ void taskrunner_register(const char *key, lua_CFunction lua_func)
     lua_setglobal(g_engine.taskrunner.lua, key);
 }
 
-/**
- * Run a single task
- */
-void taskrunner_run(const char *task)
+void taskrunner_queue(const char *task)
 {
-    char *script = storage_exec_result(&g_engine.storage, "SELECT script FROM " _TASKS_TABLE " WHERE name = \"%s\" OR id = \"%s\" LIMIT 1", task, task);
+    storage_exec_noresult(&g_engine.storage, "INSERT INTO " _QUEUED_TASKS_TABLE " (script) SELECT script FROM " _TASKS_TABLE " WHERE name = \"%s\" OR id = \"%s\" LIMIT 1", task, task);
+}
 
-    if (g_engine.debug) {
-        printf("taskrunner_run: %s\n", task);
-    }
+int _taskrunner_run_callback(void *user, int columns, char **column_data, char **column_names)
+{
+    (void)user;
+    (void)columns;
+    (void)column_names;
 
-    taskrunner_eval(script);
+    taskrunner_eval(column_data[0]);
+
+    return 0;
+}
+
+void taskrunner_run_queued()
+{
+    storage_exec_result_(&g_engine.storage, NULL, _taskrunner_run_callback, "SELECT script FROM " _QUEUED_TASKS_TABLE "; DELETE FROM " _QUEUED_TASKS_TABLE);
 }
 
 /**

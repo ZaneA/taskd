@@ -48,8 +48,12 @@ void storage_debug(storage_t *storage)
     _storage_debug_exec_result(storage, "SELECT * FROM " _VARIABLES_TABLE);
     fprintf(stdout, "\n== profiles ==\n");
     _storage_debug_exec_result(storage, "SELECT * FROM " _PROFILES_TABLE);
+    fprintf(stdout, "\n== profiles (internal) ==\n");
+    _storage_debug_exec_result(storage, "SELECT * FROM " _PROFILES_INTERNAL_TABLE);
     fprintf(stdout, "\n== tasks ==\n");
     _storage_debug_exec_result(storage, "SELECT * FROM " _TASKS_TABLE);
+    fprintf(stdout, "\n== queued tasks ==\n");
+    _storage_debug_exec_result(storage, "SELECT * FROM " _QUEUED_TASKS_TABLE);
     fprintf(stdout, "\n-- Total Queries: %i --\n", storage->queries);
     fprintf(stdout, "\n\n");
 }

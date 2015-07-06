@@ -33,19 +33,13 @@ void plugin_shutdown(plugin_api_t *plugin_api)
 
 int plugin_tick(plugin_api_t *plugin_api)
 {
-    /*struct timespec tp;
-    clock_gettime(CLOCK_REALTIME, &tp);
-
-    char value[64] = {0};
-    sprintf(value, "%ld%ld", tp.tv_sec, tp.tv_nsec / 1000000);*/
-
     // Set up some date variables
     {
         time_t t = time(NULL);
         struct tm v;
         localtime_r(&t, &v);
 
-        plugin_api->set("TIME", "%i", (int)time(NULL));
+        plugin_api->set("TIME", "%i", (int)t);
         plugin_api->set("DATE_CMP", "%02i%02i%02i", v.tm_hour, v.tm_min, v.tm_sec);
         plugin_api->set("DATE_SECONDS", "%02i", v.tm_sec);
         plugin_api->set("DATE_MINUTES", "%02i", v.tm_min);
@@ -58,5 +52,5 @@ int plugin_tick(plugin_api_t *plugin_api)
         plugin_api->set("DATE_IS_DST", "%i", v.tm_isdst);
     }
 
-    return 0;
+    return 1000;
 }

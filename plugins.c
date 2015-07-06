@@ -75,6 +75,7 @@ int plugins_load(plugins_t *plugins, const char *path)
     *(void**)&(plugins->plugins[idx].tick) = dlsym(plugins->plugins[idx].handle, "plugin_tick");
 
     int tick_rate = plugins->plugins[idx].init(&plugin_api);
+    plugins->plugins[idx].tick_rate = tick_rate;
 
     storage_exec_noresult(&g_engine.storage, "INSERT INTO " _PLUGINS_TABLE " (idx, path, tick_rate, last_run) VALUES (%i, \"%s\", %i, %i);", idx++, path, tick_rate, 0);
 
@@ -85,11 +86,18 @@ int plugins_tick(plugins_t *plugins)
 {
     for (int i = 0; i < MAX_PLUGINS; i++) {
         // @todo if plugins->plugins[i].last_run + plugins->plugins[i].period < now
-        if (plugins->plugins[i].tick != NULL) {
+        if (plugins->plugins[i].tick != NULL && (plugins->plugins[i].last_run + plugins->plugins[i].tick_rate < g_engine.now)) {
             if (g_engine.debug) {
                 fprintf(stderr, "plugins_tick: Plugin %p tick\n", plugins->plugins[i].handle);
             }
-            plugins->plugins[i].tick(&plugin_api);
+
+            plugins->plugins[i].tick_rate = plugins->plugins[i].tick(&plugin_api);
+            plugins->plugins[i].last_run = g_engine.now;
+
+            // If tick rate is lower than current then replace it
+            if (plugins->plugins[i].tick_rate > 0 && plugins->plugins[i].tick_rate < g_engine.tick_rate) {
+                g_engine.tick_rate = plugins->plugins[i].tick_rate;
+            }
         }
     }
 

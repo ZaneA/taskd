@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     // Set the default tick rate
     // @todo set minimum and maximum tick rate to override plugins/tasks?
     // This is in nanoseconds
-    int tick_rate = atoi(getenv("TASKERD_TICK_RATE")) * 1000;
+    int tick_rate = atoi(getenv("TASKERD_TICK_RATE"));
 
     fprintf(stderr, "Initializing subsystems.\n");
 
@@ -78,33 +78,33 @@ int main(int argc, char **argv)
     // Mainloop
     while (running) {
         g_engine.debug = debug;
-        g_engine.next_tick = tick_rate; // Reset tick rate each loop
+        g_engine.tick_rate = tick_rate; // Reset tick rate each loop
 
-        // @todo add high resolution timer to g_engine struct
+        // Add high resolution time (millisecond resolution)
+        struct timespec tp;
+        clock_gettime(CLOCK_MONOTONIC, &tp);
+        g_engine.now = (tp.tv_sec * 1000) + (tp.tv_nsec / 1000000);
 
         // Call a tick function on plugins so they can set new variables if needed
         plugins_tick(&g_engine.plugins);
+
+        // @todo make this function "queue" tasks to be run
+        // This way we queue tasks on variable change instead of running them at that
+        // exact point in time and potentially screwing up program flow or getting into a loop.
+        // Might also be possible to run this stuff in a thread later this way.
+        profiles_queue(&g_engine.profiles, PROFILES_CONDITION_ALWAYS, NULL); // Run all "always" profiles
+        profiles_queue(&g_engine.profiles, PROFILES_CONDITION_CUSTOM, NULL); // Maybe run "custom" profiles
 
         // If we're in DEBUG mode we print out the SQLite tables each tick
         if (g_engine.debug) {
             storage_debug(&g_engine.storage);
         }
 
-        // @todo make this function "queue" tasks to be run
-        // This way we queue tasks on variable change instead of running them at that
-        // exact point in time and potentially screwing up program flow or getting into a loop.
-        // Might also be possible to run this stuff in a thread later this way.
-        profiles_run(&g_engine.profiles, PROFILES_CONDITION_ALWAYS, NULL); // Run all "always" profiles
-        profiles_run(&g_engine.profiles, PROFILES_CONDITION_CUSTOM, NULL); // Maybe run "custom" profiles
-
         // @todo run the actual tasks here
-        //tasks_run(&g_engine.taskrunner, tasklist);
+        taskrunner_run_queued();
 
-        // Pause for a second, this should be replaced by something smarter eventually
-        // Probably a pause for the shortest time (500ms or so) and check which plugins need to tick
-        // OR figure out when next tick needs to occur and sleep exactly that long
-        // @todo add g_engine.next_tick, during plugins_tick() / profiles_run() if period is shorter than current next_time then update
-        usleep(g_engine.next_tick);
+        // This should sleep exactly as long as requested for the next plugin to tick.
+        usleep(g_engine.tick_rate * 1000);
     }
 
     fprintf(stderr, "Caught SIGINT, cleaning up.\n");

@@ -18,7 +18,8 @@
 
 typedef struct {
     int debug;
-    int next_tick;
+    int tick_rate;
+    long now;
     storage_t storage;
     taskrunner_t taskrunner;
     variables_t variables;
