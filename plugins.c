@@ -2,6 +2,17 @@
 #include "plugins.h"
 
 // private
+void sql_simple(void *user, int(*callback)(void*, int, char**, char**), const char *format, ...)
+{
+    va_list args;
+    char buffer[BUFSIZ];
+
+    va_start(args, format);
+    vsnprintf(buffer, sizeof buffer, format, args);
+    va_end(args);
+
+    storage_exec_result_(&g_engine.storage, user, callback, buffer);
+}
 
 
 // public
@@ -27,6 +38,7 @@ int plugins_init(plugins_t *plugins, const char *_plugins)
     // Connect up function pointers to plugin_api struct for plugins to use
     plugin_api.get = variables_get;
     plugin_api.set = variables_set;
+    plugin_api.sql = sql_simple;
 
     // Load plugins, split by " "
     char *plugin = NULL;

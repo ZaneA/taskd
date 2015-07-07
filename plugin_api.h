@@ -4,11 +4,13 @@
 // Daemon function typedefs
 typedef char* (*variables_get_func)(const char *key);
 typedef void (*variables_set_func)(const char *key, const char *format, ...);
+typedef void (*sql_func)(void *user, int(*callback)(void*, int, char**, char**), const char *format, ...);
 
 // This struct is used by plugin to communicate with daemon
 typedef struct {
     variables_get_func get;
     variables_set_func set;
+    sql_func sql;
 } plugin_api_t;
 
 // Plugin function typedefs
