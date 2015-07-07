@@ -55,11 +55,13 @@ The core plugin will provide some very basic variables for scripts to use. Curre
 
 ### p_httpapi
 
-The httpapi plugin provides a very basic web server using libmicrohttpd. Currently the functionality is limited to:
+The httpapi plugin provides a very basic web server using libmicrohttpd that outputs JSON along with a basic web UI (at http://127.0.0.1:8080/index.html). Currently the functionality is limited to:
 
 `http://127.0.0.1:8080/variables?key=VAR` and `http://127.0.0.1:8080/variables?key=VAR&value=new%20value`
 
 This will be extended to allow introspecting all data and manipulating profiles/tasks.
+
+![taskd web](http://i.imgur.com/UwIZCB1.png)
 
 ## Installing
 
@@ -68,6 +70,7 @@ Clone this repo, make sure you have the following installed:
 - lua5.1 (5.2 will NOT work currently)
 - sqlite3
 - libmicrohttpd if you want to build the httpapi
+- libjansson (tested with 2.7) if you want to build the httpapi
 
 Simply run `make taskd`, `make p_core`, and `make p_httpapi`. If need be modify `run_taskd.sh` and run `chmod +x run_taskd.sh`.
 

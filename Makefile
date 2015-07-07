@@ -5,4 +5,4 @@ p_core: p_core.c plugin_api.h
 	gcc -Wall -Wextra -Werror -std=gnu99 -pedantic -shared -fPIC -o plugins/p_core.so p_core.c
 
 p_httpapi: p_httpapi.c plugin_api.h
-	gcc -Wall -Wextra -Werror -std=gnu99 -pedantic -shared -fPIC -o plugins/p_httpapi.so p_httpapi.c -lmicrohttpd
+	gcc -Wall -Wextra -Werror -std=gnu99 -pedantic -shared -fPIC -o plugins/p_httpapi.so p_httpapi.c -lmicrohttpd -ljansson
