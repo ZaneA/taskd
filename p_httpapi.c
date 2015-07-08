@@ -29,7 +29,7 @@ int sql_callback(void *user, int columns, char **column_data, char **column_name
         json_object_set_new(object, column_names[i], json_string(column_data[i]));
     }
 
-    json_array_append_new(root, object);
+    json_array_append_new(root, object); // LEAK
 
     return 0;
 }
