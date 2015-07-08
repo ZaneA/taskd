@@ -2,15 +2,28 @@
 <html>
     <head>
         <title>taskd</title>
+        <link rel="stylesheet" type="text/css" href="/main.css" />
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/themes/kimbie-light.css" />
     </head>
     <body>
-        <h1>taskd</h1>
-
         <div id="app"></div>
 
+        <!-- React + jQuery -->
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react-router/0.13.3/ReactRouter.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+        <!-- Rainbow -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/rainbow.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/language/lua.js"></script>
+
+        <!-- Ace -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/ace.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-lua.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/theme-github.js"></script>
+
+        <!-- App -->
         <script type="text/jsx">
             // State
             var app = {
@@ -19,41 +32,262 @@
                 tasks: []
             };
 
+            function conditionTypeToString(type) {
+                switch (type) {
+                    case '0':
+                        return 'Always';
+                    case '1':
+                        return 'Custom';
+                    case '2':
+                        return 'Variable Changed';
+                    default:
+                        return 'Unknown';
+                }
+            }
+
+
+            var Code = React.createClass({
+                componentDidMount: function () {
+                    Rainbow.color(this.refs.code);
+                },
+                render: function () {
+                    return (
+                        <pre><code ref="code" data-language="lua">{this.props.source}</code></pre>
+                    );
+                }
+            });
+
+            var Table = React.createClass({
+                render: function () {
+                    return (
+                        <table>
+                            <thead>
+                                <tr>
+                                    {this.props.columns.map(function (column) {
+                                        return <td>{column}</td>;
+                                    })}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.props.rows.map(function (row) {
+                                    return (
+                                        <tr>
+                                            {row.map(function (column) {
+                                                return <td>{column}</td>;
+                                            })}
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    );
+                }
+            });
+
+            var Editor = React.createClass({
+                componentDidMount: function () {
+                    this.editor = ace.edit(this.refs.editor);
+                    this.editor.setTheme('ace/theme/github');
+                    this.editor.getSession().setMode('ace/mode/lua');
+                },
+                render: function () {
+                    return (
+                        <div ref="editor">{this.props.source}</div>
+                    );
+                }
+            });
+
+            var Field = React.createClass({
+                render: function () {
+                    return (
+                        <li className="field">
+                            <div className="field__label">{this.props.label}</div>
+                            <div className="field__control">{this.props.children}</div>
+                        </li>
+                    );
+                }
+            });
+
+            var FieldSet = React.createClass({
+                render: function () {
+                    return <ul className="fieldset">{this.props.children}</ul>;
+                }
+            });
+
+            var ProfileList = React.createClass({
+                getInitialState: function () {
+                    return app;
+                },
+                update: function () {
+                    $.getJSON("/profiles", function (data) {
+                        app.profiles = data.profiles;
+                        this.setState(app);
+                    }.bind(this));
+                },
+                componentDidMount: function () {
+                    this.timer = setInterval(this.update, 5000);
+                    this.update();
+                },
+                componentWillUnmount: function () {
+                    clearInterval(this.timer);
+                },
+                render: function () {
+                    return (
+                        <div>
+                            <Table
+                                columns={['ID', 'Name', 'Type', 'Custom', 'Enter Task', 'Tick Task', 'Exit Task', 'Tick Rate', 'Actions']}
+                                rows={this.state.profiles.map(function (profile, i) {
+                                    return [
+                                        <Link to="profile" params={{id: i}}>{profile.id}</Link>,
+                                        <Link to="profile" params={{id: i}}>{profile.name}</Link>,
+                                        conditionTypeToString(profile.condition_type),
+                                        <Code source={profile.condition_custom} />,
+                                        <Link to="/tasks">{profile.enter_task}</Link>,
+                                        <Link to="/tasks">{profile.tick_task}</Link>,
+                                        <Link to="/tasks">{profile.exit_task}</Link>,
+                                        profile.tick_rate,
+                                        <Link to="/profiles">Edit</Link>
+                                    ];
+                                })}
+                                />
+                            <RouteHandler />
+                        </div>
+                    );
+                }
+            });
+
+            var ProfileEdit = React.createClass({
+                getInitialState: function () {
+                    return {};
+                },
+                componentDidMount: function () {
+                    $.getJSON("/profiles", function (data) {
+                        this.setState(data.profiles[this.props.params.id]);
+                    }.bind(this));
+                },
+                componentWillReceiveProps: function (nextProps) {
+                    $.getJSON("/profiles", function (data) {
+                        this.setState(data.profiles[nextProps.params.id]);
+                    }.bind(this));
+                },
+                render: function () {
+                    return (
+                        <FieldSet>
+                            <Field label="Name"><input type="text" value={this.state.name} /></Field>
+                            <Field label="Description"><input type="text" value={this.state.description} /></Field>
+                            <Field label="Condition Type"><select><option>Always</option></select></Field>
+                            <Field label="Custom"><Editor source={this.state.condition_custom} /></Field>
+                            <Field label="Enter Task"><select><option>Test</option></select></Field>
+                            <Field label="Tick Task"><select><option>Test</option></select></Field>
+                            <Field label="Exit Task"><select><option>Test</option></select></Field>
+                            <Field label="Tick Rate"><input type="text" value={this.state.tick_rate} /></Field>
+                        </FieldSet>
+                    );
+                }
+            });
+
+            var TaskList = React.createClass({
+                getInitialState: function () {
+                    return app;
+                },
+                update: function () {
+                    $.getJSON("/tasks", function (data) {
+                        app.tasks = data.tasks;
+                        this.setState(app);
+                    }.bind(this));
+                },
+                componentDidMount: function () {
+                    this.timer = setInterval(this.update, 5000);
+                    this.update();
+                },
+                componentWillUnmount: function () {
+                    clearInterval(this.timer);
+                },
+                render: function () {
+                    return (
+                        <Table
+                            columns={['ID', 'Name', 'Description', 'Script']}
+                            rows={this.state.tasks.map(function (task) {
+                                return [task.id, task.name, <em>{task.description}</em>, <Code source={task.script} />];
+                            })}
+                            />
+                    );
+                }
+            });
+
             var VariableList = React.createClass({
                 getInitialState: function () {
                     return app;
                 },
-                updateVariables: function () {
+                update: function () {
                     $.getJSON("/variables", function (data) {
                         app.variables = data.variables;
                         this.setState(app);
                     }.bind(this));
                 },
                 componentDidMount: function () {
-                    this.timer = setInterval(this.updateVariables, 1000);
+                    this.timer = setInterval(this.update, 1000);
+                    this.update();
                 },
                 componentWillUnmount: function () {
                     clearInterval(this.timer);
                 },
-                render: function() {
+                render: function () {
                     return (
-                        <table className="VariablesList">
-                            <tr><td>Key</td><td>Value</td></tr>
-                            {this.state.variables.map(function (variable) {
-                                return (
-                                    <tr><td>{variable.key}</td><td>{variable['value']}</td></tr>
-                                )
+                        <Table
+                            columns={['Key', 'Value']}
+                            rows={this.state.variables.map(function (variable) {
+                                return [ variable.key, variable['value'] ];
                             })}
-                        </table>
+                            />
                     );
                 }
             });
 
+            var App = React.createClass({
+                render: function () {
+                    return (
+                        <div>
+                            <header>taskd</header>
+                            <div id="wrapper">
+                                <nav id="nav-primary">
+                                    <ul>
+                                        <li><Link to="profiles">Profiles</Link></li>
+                                        <li><Link to="tasks">Tasks</Link></li>
+                                        <li><Link to="variables">Variables</Link></li>
+                                    </ul>
+                                </nav>
+                                <main>
+                                    <RouteHandler />
+                                </main>
+                            </div>
+                            <footer><a href="https://github.com/ZaneA/taskd" target="_blank">Fork taskd on GitHub</a></footer>
+                        </div>
+                    );
+                }
+            });
+
+            var Router = window.ReactRouter;
+            var RouteHandler = Router.RouteHandler;
+            var Route = Router.Route;
+            var Link = Router.Link;
+
             // Boot React
-            React.render(
-                <VariableList app={app}/>,
-                document.getElementById("app")
+            var routes = (
+                <Route path="/" handler={App}>
+                    <Route name="profiles" path="profiles" handler={ProfileList}>
+                        <Route name="profile" path=":id" handler={ProfileEdit} />
+                    </Route>
+                    <Route name="tasks" path="tasks" handler={TaskList}>
+                    </Route>
+                    <Route name="variables" path="variables" handler={VariableList}>
+                    </Route>
+                </Route>
             );
+
+            Router.run(routes, Router.HashLocation, function (Root) {
+                React.render(<Root/>, document.getElementById("app"));
+            });
         </script>
     </body>
 </html>

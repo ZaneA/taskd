@@ -1,0 +1,123 @@
+html, body {
+  background: #f8f8f8;
+  color: #111;
+  margin: 0;
+  padding: 0;
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px; }
+
+a {
+  color: #111;
+  text-decoration: none;
+  border-bottom: 1px dotted #aaa; }
+
+pre {
+  margin: 0 !important;
+  font-size: 11px !important;
+  background: none !important; }
+
+input {
+  padding: 5px;
+  border: 1px solid #eee;
+  width: 100%; }
+
+table {
+  border-collapse: collapse;
+  width: 100%; }
+  table thead {
+    background: #111;
+    color: #fff; }
+    table thead td {
+      font-weight: bold;
+      border-right: 1px solid #222; }
+  table td {
+    padding: 10px 10px;
+    border-right: 1px solid #ccc; }
+    table td:last-child {
+      border-right: none; }
+  table tr {
+    border-bottom: 1px solid #eee; }
+
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin: 0 auto; }
+
+header {
+  background: #111;
+  color: #fff;
+  height: 60px;
+  line-height: 60px;
+  padding: 0 20px;
+  font-size: 32px; }
+
+footer {
+  text-align: right;
+  font-size: 10px;
+  margin: 0 20px; }
+  footer a {
+    color: #888; }
+
+main {
+  flex: 1;
+  min-height: 80vh; }
+
+nav {
+  display: flex;
+  border-right: 1px solid #7600a0;
+  margin: 0;
+  padding: 0; }
+  nav ul {
+    margin: 0;
+    padding: 0; }
+    nav ul li {
+      list-style: none;
+      display: block;
+      margin: 0;
+      border-bottom: 1px solid #9b00d3; }
+      nav ul li a {
+        display: block;
+        padding: 20px;
+        width: 100%;
+        margin: 0;
+        color: #fff;
+        border-bottom: none;
+        text-align: right; }
+        nav ul li a.active, nav ul li a:hover {
+          background: #9b00d3; }
+
+#wrapper {
+  display: flex;
+  flex: 1;
+  background: #fff;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3); }
+
+#nav-primary {
+  flex: 0 0 120px;
+  background: #CB3AFF; }
+  #nav-primary > ul > li > a {
+    width: 120px; }
+
+#nav-secondary {
+  flex: 0 0 320px;
+  background: #d86dff; }
+  #nav-secondary > ul > li > a {
+    width: 320px; }
+
+.fieldset {
+  padding: 20px; }
+
+.field {
+  list-style: none;
+  margin-bottom: 10px; }
+
+.field__label {
+  font-weight: bold;
+  margin-bottom: 4px; }
+
+.field__control {
+  max-width: 400px; }
+
+/*# sourceMappingURL=main.css.map */
