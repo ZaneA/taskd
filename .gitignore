@@ -1,3 +1,5 @@
 *.db
 plugins
 taskd
+.sass-cache
+*.map
