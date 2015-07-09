@@ -57,8 +57,8 @@ int _profiles_run_callback(void *user, int columns, char **column_data, char **c
     int condition_type = (intptr_t)user;
 
     int state = column_data[7] ? atoi(column_data[7]) : PROFILES_STATE_INACTIVE;
-    long last_run = column_data[8] ? atoi(column_data[8]) : 0;
-    long tick_rate = (column_data[9] ? atoi(column_data[9]) : 1000);
+    unsigned long last_run = column_data[8] ? atoi(column_data[8]) : 0;
+    int tick_rate = (column_data[9] ? atoi(column_data[9]) : 1000);
 
     // Lower engine tick rate if necessary
     if (tick_rate > 0 && tick_rate < g_engine.tick_rate) {

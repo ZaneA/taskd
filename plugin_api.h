@@ -25,7 +25,7 @@ typedef void (*plugin_event_func)(plugin_api_t *plugin_api, int event, void *eve
 typedef struct {
     void* handle;
     int tick_rate;
-    int last_run;
+    unsigned long last_run;
     plugin_init_func init;
     plugin_shutdown_func shutdown;
     plugin_tick_func tick;
