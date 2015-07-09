@@ -9,3 +9,6 @@ p_httpapi: p_httpapi.c plugin_api.h
 
 p_replicate: p_replicate.c plugin_api.h
 	gcc -Wall -Wextra -Werror -std=gnu99 -pedantic -shared -fPIC -o plugins/p_replicate.so p_replicate.c -lcurl
+
+p_x11: p_x11.c plugin_api.h
+	gcc -Wall -Wextra -Werror -std=gnu99 -pedantic -shared -fPIC -o plugins/p_x11.so p_x11.c -lX11 -lXext -lXss

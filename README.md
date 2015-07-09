@@ -69,6 +69,10 @@ The replicate plugin listens to variable changes and if a `TASKD_REPLICATE_HOST`
 
 Useful to run a local taskd with special plugins and replicate these to a hub elsewhere for processing.
 
+### p_x11
+
+Sets `X11_IDLE` to how many seconds the current display has been idle (using the XScreenSaver extension).
+
 ## Installing
 
 Clone this repo, make sure you have the following installed:
