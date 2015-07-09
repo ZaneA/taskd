@@ -14,8 +14,7 @@
 #include <microhttpd.h>
 #include <jansson.h>
 
-// @todo grab from environment
-#define PORT 8080
+#define DEFAULT_PORT 8080
 
 static struct MHD_Daemon *mhd_daemon = NULL;
 
@@ -155,8 +154,14 @@ int mhd_answer_to_connection(
  */
 int plugin_init(plugin_api_t *plugin_api)
 {
+    int port = DEFAULT_PORT;
+    const char *env_port = getenv("TASKD_HTTPAPI_PORT");
+    if (env_port != NULL) {
+        port = atoi(env_port);
+    }
+
     // Spin up HTTP server
-    mhd_daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, PORT, NULL, NULL, &mhd_answer_to_connection, (void*)plugin_api, MHD_OPTION_END);
+    mhd_daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, port, NULL, NULL, &mhd_answer_to_connection, (void*)plugin_api, MHD_OPTION_END);
 
     if (mhd_daemon == NULL) {
         return -1;
