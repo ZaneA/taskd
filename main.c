@@ -12,12 +12,7 @@
 #include <unistd.h>
 
 static volatile int running = 1;
-
-#ifdef DEBUG
-static volatile int debug = 1;
-#else
 static volatile int debug = 0;
-#endif
 
 void signal_handler(int signal)
 {
@@ -54,6 +49,11 @@ int main(int argc, char **argv)
     // @todo set minimum and maximum tick rate to override plugins/tasks?
     // This is in nanoseconds
     int tick_rate = atoi(getenv("TASKD_TICK_RATE"));
+
+    const char *env_debug = getenv("TASKD_DEBUG");
+    if (env_debug != NULL) {
+        debug = atoi(env_debug);
+    }
 
     fprintf(stderr, "Initializing subsystems.\n");
 
