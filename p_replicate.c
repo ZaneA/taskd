@@ -7,6 +7,14 @@
 
 char *replicate_host_env = NULL;
 
+size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp)
+{
+    (void)buffer;
+    (void)userp;
+    
+    return size * nmemb;
+}
+
 /**
  * Initialize plugin.
  */
@@ -51,6 +59,7 @@ void plugin_event(plugin_api_t *plugin_api, int event, void *event_data)
                     sprintf(url, "%s/variables?key=%s&value=%s", replicate_host_env, key, value);
 
                     curl_easy_setopt(curl, CURLOPT_URL, url);
+                    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
                     curl_easy_perform(curl);
                     curl_easy_cleanup(curl);
                 }
