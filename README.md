@@ -63,6 +63,12 @@ This will be extended to allow introspecting all data and manipulating profiles/
 
 ![taskd web](http://i.imgur.com/UwIZCB1.png)
 
+### p_replicate
+
+The replicate plugin listens to variable changes and if a `TASKD_REPLICATE_HOST` option is provided (e.g. `http://remote:8080`) all variable values will be replicated to this remote instance.
+
+Useful to run a local taskd with special plugins and replicate these to a hub elsewhere for processing.
+
 ## Installing
 
 Clone this repo, make sure you have the following installed:
@@ -71,11 +77,12 @@ Clone this repo, make sure you have the following installed:
 - sqlite3
 - libmicrohttpd if you want to build the httpapi
 - libjansson (tested with 2.7) if you want to build the httpapi
+- libcurl if you want to build p_replicate
 
-Simply run `make taskd`, `make p_core`, and `make p_httpapi`. If need be modify `run_taskd.sh` and run `chmod +x run_taskd.sh`.
+Simply run `make taskd`, and `make <plugin name>` (for each plugin listed above). If need be modify `run_taskd.sh` and run `chmod +x run_taskd.sh`.
 
 Finally if all goes well you should be able to `./run_taskd.sh`.
 
 ## Usage
 
-Right now there isn't a decent way to set up profiles and tasks. This will come next, for now the database must be manipulated by hand (i.e. by using the `sqlite3` CLI).
+There is a basic web UI available at http://127.0.0.1:8080/index.html by default. This will eventually allow the creation of profiles/tasks/variables. For now the database must be manipulated by hand (i.e. by using the `sqlite3` CLI).
