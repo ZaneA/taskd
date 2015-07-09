@@ -1,6 +1,8 @@
 #ifndef __PLUGIN_API_H
 #define __PLUGIN_API_H
 
+#define PLUGIN_EVENT_VARIABLE_CHANGED 0
+
 // Daemon function typedefs
 typedef char* (*variables_get_func)(const char *key);
 typedef void (*variables_set_func)(const char *key, const char *format, ...);
@@ -17,6 +19,7 @@ typedef struct {
 typedef int (*plugin_init_func)(plugin_api_t *plugin_api);
 typedef void (*plugin_shutdown_func)(plugin_api_t *plugin_api);
 typedef int (*plugin_tick_func)(plugin_api_t *plugin_api);
+typedef void (*plugin_event_func)(plugin_api_t *plugin_api, int event, void *event_data);
 
 // This struct is used by daemon to communicate with plugins
 typedef struct {
@@ -26,6 +29,7 @@ typedef struct {
     plugin_init_func init;
     plugin_shutdown_func shutdown;
     plugin_tick_func tick;
+    plugin_event_func event;
 } plugin_t;
 
 #endif

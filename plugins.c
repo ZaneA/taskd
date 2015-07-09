@@ -95,6 +95,7 @@ int plugins_load(plugins_t *plugins, const char *path)
     *(void**)&(plugins->plugins[idx].init) = dlsym(plugins->plugins[idx].handle, "plugin_init");
     *(void**)&(plugins->plugins[idx].shutdown) = dlsym(plugins->plugins[idx].handle, "plugin_shutdown");
     *(void**)&(plugins->plugins[idx].tick) = dlsym(plugins->plugins[idx].handle, "plugin_tick");
+    *(void**)&(plugins->plugins[idx].event) = dlsym(plugins->plugins[idx].handle, "plugin_event");
 
     // If init was found
     if (plugins->plugins[idx].init != NULL) {
@@ -128,4 +129,13 @@ int plugins_tick(plugins_t *plugins)
     }
 
     return 0;
+}
+
+void plugins_event(plugins_t *plugins, int event, void *event_data)
+{
+    for (int i = 0; i < MAX_PLUGINS; i++) {
+        if (plugins->plugins[i].event != NULL) {
+            plugins->plugins[i].event(&plugin_api, event, event_data);
+        }
+    }
 }

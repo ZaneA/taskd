@@ -70,4 +70,5 @@ void variables_set(const char *key, const char *format, ...)
 
     // Queue these profiles as running them inline could break program flow
     profiles_queue(&g_engine.profiles, PROFILES_CONDITION_VARIABLE_CHANGED, key);
+    plugins_event(&g_engine.plugins, PLUGIN_EVENT_VARIABLE_CHANGED, (void*)key);
 }

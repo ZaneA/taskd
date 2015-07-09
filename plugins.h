@@ -18,5 +18,6 @@ void plugins_shutdown();
 
 int plugins_load(plugins_t *plugins, const char *path);
 int plugins_tick(plugins_t *plugins);
+void plugins_event(plugins_t *plugins, int event, void *event_data);
 
 #endif
