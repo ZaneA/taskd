@@ -61,7 +61,9 @@ The httpapi plugin provides a very basic web server using libmicrohttpd that out
 
 This will be extended to allow introspecting all data and manipulating profiles/tasks.
 
-![taskd web](http://i.imgur.com/UwIZCB1.png)
+![taskd profiles](https://i.imgur.com/dRT6lfn.png)
+![taskd tasks](https://i.imgur.com/oOPHUJC.png)
+![taskd variables](https://i.imgur.com/6r3XNnS.png)
 
 ### p_replicate
 
@@ -89,4 +91,4 @@ Finally if all goes well you should be able to `./run_taskd.sh`.
 
 ## Usage
 
-There is a basic web UI available at http://127.0.0.1:8080/index.html by default. This will eventually allow the creation of profiles/tasks/variables. For now the database must be manipulated by hand (i.e. by using the `sqlite3` CLI).
+There is a basic web UI available at http://127.0.0.1:8080/index.html by default. Some functionality is still missing so use of the `sqlite3` command line may be useful.
