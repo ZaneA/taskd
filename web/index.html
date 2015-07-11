@@ -4,6 +4,7 @@
         <title>taskd</title>
         <link rel="stylesheet" type="text/css" href="/main.css" />
         <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/themes/kimbie-light.css" />
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.4.0/codemirror.min.css" />
     </head>
     <body>
         <div id="app"></div>
@@ -18,10 +19,9 @@
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/rainbow.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/language/lua.js"></script>
 
-        <!-- Ace -->
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/ace.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-lua.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/theme-github.js"></script>
+        <!-- CodeMirror -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.4.0/codemirror.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.4.0/mode/lua/lua.min.js"></script>
 
         <!-- App -->
         <script type="text/jsx">
@@ -31,6 +31,11 @@
                 profiles: [],
                 tasks: []
             };
+
+            var Router = window.ReactRouter;
+            var RouteHandler = Router.RouteHandler;
+            var Route = Router.Route;
+            var Link = Router.Link;
 
             function conditionTypeToString(type) {
                 switch (type) {
@@ -47,12 +52,26 @@
 
 
             var Code = React.createClass({
+                getInitialState: function () {
+                    return {
+                        value: ""
+                    };
+                },
                 componentDidMount: function () {
+                    this.setState({value: this.props.value});
+                },
+                componentWillReceiveProps: function (props) {
+                    this.setState({value: props.value});
+                },
+                shouldComponentUpdate: function () {
+                    return true;
+                },
+                componentDidUpdate: function () {
                     Rainbow.color(this.refs.code);
                 },
                 render: function () {
                     return (
-                        <pre><code ref="code" data-language="lua">{this.props.source}</code></pre>
+                        <pre><code ref="code" data-language="lua">{this.state.value}</code></pre>
                     );
                 }
             });
@@ -85,14 +104,39 @@
             });
 
             var Editor = React.createClass({
+                getInitialState: function () {
+                    return {
+                        value: ""
+                    };
+                },
                 componentDidMount: function () {
-                    this.editor = ace.edit(this.refs.editor);
-                    this.editor.setTheme('ace/theme/github');
-                    this.editor.getSession().setMode('ace/mode/lua');
+                    this.editor = CodeMirror.fromTextArea(React.findDOMNode(this.refs.editor));
+                    this.editor.setSize(null, this.props.height || 40);
+                    this.editor.on("changes", function (changes) {
+                        var value = this.editor.getValue();
+                        if (value != this.state.value) {
+                            this.props.onChange({
+                                target: {
+                                    value: this.editor.getValue()
+                                }
+                            })
+                        }
+                    }.bind(this));
+                },
+                componentWillUnmount: function () {
+                    this.editor.off("changes");
+                },
+                componentWillReceiveProps: function (props) {
+                    this.setState({value: props.value});
+                },
+                componentDidUpdate: function (prevProps, prevState) {
+                    if (this.editor.getValue() != this.state.value) {
+                        this.editor.setValue(this.state.value);
+                    }
                 },
                 render: function () {
                     return (
-                        <div ref="editor">{this.props.source}</div>
+                        <textarea ref="editor" />
                     );
                 }
             });
@@ -104,6 +148,20 @@
                             <div className="field__label">{this.props.label}</div>
                             <div className="field__control">{this.props.children}</div>
                         </li>
+                    );
+                }
+            });
+
+            var Popup = React.createClass({
+                render: function () {
+                    return (
+                        <div className="popup">
+                            <h1 className="popup__title">{this.props.title}</h1>
+                            <Link to={this.props.backLink} className="popup__close">&times;</Link>
+                            <div className="popup__content">
+                                {this.props.children}
+                            </div>
+                        </div>
                     );
                 }
             });
@@ -124,32 +182,33 @@
                         this.setState(app);
                     }.bind(this));
                 },
+                componentWillReceiveProps: function (props) {
+                    this.update();
+                },
                 componentDidMount: function () {
-                    this.timer = setInterval(this.update, 5000);
                     this.update();
                 },
                 componentWillUnmount: function () {
-                    clearInterval(this.timer);
                 },
                 render: function () {
                     return (
                         <div>
                             <Table
-                                columns={['ID', 'Name', 'Type', 'Custom', 'Enter Task', 'Tick Task', 'Exit Task', 'Tick Rate', 'Actions']}
+                                columns={['ID', 'Name', 'Type', 'Custom', 'Enter Task', 'Tick Task', 'Exit Task', 'Tick Rate']}
                                 rows={this.state.profiles.map(function (profile, i) {
                                     return [
                                         <Link to="profile" params={{id: i}}>{profile.id}</Link>,
                                         <Link to="profile" params={{id: i}}>{profile.name}</Link>,
-                                        conditionTypeToString(profile.condition_type),
-                                        <Code source={profile.condition_custom} />,
+                                        <Link to="profile" params={{id: i}}>{conditionTypeToString(profile.condition_type)}</Link>,
+                                        <Code value={profile.condition_custom} />,
                                         <Link to="/tasks">{profile.enter_task}</Link>,
                                         <Link to="/tasks">{profile.tick_task}</Link>,
                                         <Link to="/tasks">{profile.exit_task}</Link>,
-                                        profile.tick_rate,
-                                        <Link to="/profiles">Edit</Link>
+                                        profile.tick_rate
                                     ];
                                 })}
                                 />
+                            <Link to="profile" params={{id: "new"}} className="btn btn--new">New</Link>
                             <RouteHandler />
                         </div>
                     );
@@ -157,31 +216,54 @@
             });
 
             var ProfileEdit = React.createClass({
+                mixins: [Router.Navigation],
                 getInitialState: function () {
-                    return {};
+                    return {
+                        id: "NULL",
+                        name: "",
+                        condition_type: 0,
+                        condition_custom: "",
+                        enter_task: "",
+                        tick_task: "",
+                        exit_task: "",
+                        tick_rate: 0
+                    };
                 },
                 componentDidMount: function () {
-                    $.getJSON("/profiles", function (data) {
-                        this.setState(data.profiles[this.props.params.id]);
+                    if (this.props.params.id != "new") {
+                        $.getJSON("/profiles", function (data) {
+                            this.setState(data.profiles[this.props.params.id]);
+                        }.bind(this));
+                    }
+                },
+                save: function () {
+                    $.getJSON("/profiles", this.state, function (data) {
+                        console.log(data);
+                        this.replaceWith("profiles");
                     }.bind(this));
                 },
-                componentWillReceiveProps: function (nextProps) {
-                    $.getJSON("/profiles", function (data) {
-                        this.setState(data.profiles[nextProps.params.id]);
-                    }.bind(this));
+                change: function (key) {
+                    return function (ev) {
+                        var obj = {};
+                        obj[key] = ev.target.value;
+                        this.setState(obj);
+                    }.bind(this);
                 },
                 render: function () {
                     return (
-                        <FieldSet>
-                            <Field label="Name"><input type="text" value={this.state.name} /></Field>
-                            <Field label="Description"><input type="text" value={this.state.description} /></Field>
-                            <Field label="Condition Type"><select><option>Always</option></select></Field>
-                            <Field label="Custom"><Editor source={this.state.condition_custom} /></Field>
-                            <Field label="Enter Task"><select><option>Test</option></select></Field>
-                            <Field label="Tick Task"><select><option>Test</option></select></Field>
-                            <Field label="Exit Task"><select><option>Test</option></select></Field>
-                            <Field label="Tick Rate"><input type="text" value={this.state.tick_rate} /></Field>
-                        </FieldSet>
+                        <Popup title={this.state.name} backLink="profiles">
+                            <FieldSet>
+                                <Field label="ID"><input type="text" value={this.state.id} onChange={this.change("id")} /></Field>
+                                <Field label="Name"><input type="text" value={this.state.name} onChange={this.change("name")} /></Field>
+                                <Field label="Condition Type"><select><option>Always</option></select></Field>
+                                <Field label="Custom"><Editor value={this.state.condition_custom} onChange={this.change("condition_custom")} /></Field>
+                                <Field label="Enter Task"><input type="text" value={this.state.enter_task} onChange={this.change("enter_task")} /></Field>
+                                <Field label="Tick Task"><input type="text" value={this.state.tick_task} onChange={this.change("tick_task")} /></Field>
+                                <Field label="Exit Task"><input type="text" value={this.state.exit_task} onChange={this.change("exit_task")} /></Field>
+                                <Field label="Tick Rate"><input type="number" value={this.state.tick_rate} onChange={this.change("tick_rate")} /></Field>
+                                <Field label="Actions"><button onClick={this.save}>Save</button></Field>
+                            </FieldSet>
+                        </Popup>
                     );
                 }
             });
@@ -197,20 +279,75 @@
                     }.bind(this));
                 },
                 componentDidMount: function () {
-                    this.timer = setInterval(this.update, 5000);
+                    this.update();
+                },
+                componentWillReceiveProps: function (props) {
                     this.update();
                 },
                 componentWillUnmount: function () {
-                    clearInterval(this.timer);
                 },
                 render: function () {
                     return (
-                        <Table
-                            columns={['ID', 'Name', 'Description', 'Script']}
-                            rows={this.state.tasks.map(function (task) {
-                                return [task.id, task.name, <em>{task.description}</em>, <Code source={task.script} />];
-                            })}
-                            />
+                        <div>
+                            <Table
+                                columns={['ID', 'Name', 'Description', 'Script']}
+                                rows={this.state.tasks.map(function (task, i) {
+                                    return [
+                                        <Link to="task" params={{id: i}}>{task.id}</Link>,
+                                        <Link to="task" params={{id: i}}>{task.name}</Link>,
+                                        <Link to="task" params={{id: i}}><em>{task.description}</em></Link>,
+                                        <Code value={task.script} />
+                                    ];
+                                })}
+                                />
+                            <Link to="task" params={{id: "new"}} className="btn btn--new">New</Link>
+                            <RouteHandler />
+                        </div>
+                    );
+                }
+            });
+
+            var TaskEdit = React.createClass({
+                mixins: [Router.Navigation],
+                getInitialState: function () {
+                    return {
+                        id: "NULL",
+                        name: "",
+                        description: "",
+                        script: ""
+                    };
+                },
+                componentDidMount: function () {
+                    if (this.props.params.id != "new") {
+                        $.getJSON("/tasks", function (data) {
+                            this.setState(data.tasks[this.props.params.id]);
+                        }.bind(this));
+                    }
+                },
+                save: function () {
+                    $.getJSON("/tasks", this.state, function (data) {
+                        console.log(data);
+                        this.replaceWith("tasks");
+                    }.bind(this));
+                },
+                change: function (key) {
+                    return function (ev) {
+                        var obj = {};
+                        obj[key] = ev.target.value;
+                        this.setState(obj);
+                    }.bind(this);
+                },
+                render: function () {
+                    return (
+                        <Popup title={this.state.name} backLink="tasks">
+                            <FieldSet>
+                                <Field label="ID"><input type="text" value={this.state.id} onChange={this.change("id")} /></Field>
+                                <Field label="Name"><input type="text" value={this.state.name} onChange={this.change("name")} /></Field>
+                                <Field label="Description"><input type="text" value={this.state.description} onChange={this.change("description")} /></Field>
+                                <Field label="Script"><Editor value={this.state.script} onChange={this.change("script")} height={200} /></Field>
+                                <Field label="Actions"><button onClick={this.save}>Save</button></Field>
+                            </FieldSet>
+                        </Popup>
                     );
                 }
             });
@@ -226,7 +363,7 @@
                     }.bind(this));
                 },
                 componentDidMount: function () {
-                    this.timer = setInterval(this.update, 1000);
+                    this.timer = setInterval(this.update, 500);
                     this.update();
                 },
                 componentWillUnmount: function () {
@@ -267,11 +404,6 @@
                 }
             });
 
-            var Router = window.ReactRouter;
-            var RouteHandler = Router.RouteHandler;
-            var Route = Router.Route;
-            var Link = Router.Link;
-
             // Boot React
             var routes = (
                 <Route path="/" handler={App}>
@@ -279,6 +411,7 @@
                         <Route name="profile" path=":id" handler={ProfileEdit} />
                     </Route>
                     <Route name="tasks" path="tasks" handler={TaskList}>
+                        <Route name="task" path=":id" handler={TaskEdit} />
                     </Route>
                     <Route name="variables" path="variables" handler={VariableList}>
                     </Route>

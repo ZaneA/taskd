@@ -1,3 +1,8 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0; }
+
 html, body {
   background: #f8f8f8;
   color: #111;
@@ -16,10 +21,43 @@ pre {
   font-size: 11px !important;
   background: none !important; }
 
-input {
+input, textarea, .CodeMirror {
   padding: 5px;
-  border: 1px solid #eee;
-  width: 100%; }
+  border: 1px solid #bbb;
+  border-top: 1px solid #a2a2a2;
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 2px; }
+
+select {
+  background: #fff;
+  color: #111;
+  padding: 4px 10px;
+  border: 0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
+  text-transform: uppercase;
+  font-weight: bold; }
+
+button, input[type=button], input[type=submit], .btn {
+  background: #af75c4;
+  color: #fff;
+  padding: 10px 20px;
+  border: 0;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  text-transform: uppercase;
+  font-weight: bold; }
+  button.active, button:hover, input[type=button].active, input[type=button]:hover, input[type=submit].active, input[type=submit]:hover, .btn.active, .btn:hover {
+    background: #7d3f94;
+    cursor: pointer; }
+
+.btn--new {
+  margin: 10px;
+  display: inline-block; }
+
+.CodeMirror {
+  min-width: 360px;
+  cursor: text; }
 
 table {
   border-collapse: collapse;
@@ -29,7 +67,8 @@ table {
     color: #fff; }
     table thead td {
       font-weight: bold;
-      border-right: 1px solid #222; }
+      border-right: 1px solid #222;
+      text-transform: uppercase; }
   table td {
     padding: 10px 10px;
     border-right: 1px solid #ccc; }
@@ -65,7 +104,7 @@ main {
 
 nav {
   display: flex;
-  border-right: 1px solid #7600a0;
+  border-right: 1px solid #5f3070;
   margin: 0;
   padding: 0; }
   nav ul {
@@ -75,7 +114,7 @@ nav {
       list-style: none;
       display: block;
       margin: 0;
-      border-bottom: 1px solid #9b00d3; }
+      border-bottom: 1px solid #7d3f94; }
       nav ul li a {
         display: block;
         padding: 20px;
@@ -83,9 +122,11 @@ nav {
         margin: 0;
         color: #fff;
         border-bottom: none;
-        text-align: right; }
+        font-weight: bold;
+        text-align: right;
+        text-transform: uppercase; }
         nav ul li a.active, nav ul li a:hover {
-          background: #9b00d3; }
+          background: #7d3f94; }
 
 #wrapper {
   display: flex;
@@ -96,7 +137,7 @@ nav {
 
 #nav-primary {
   flex: 0 0 120px;
-  background: #CB3AFF; }
+  background: #af75c4; }
   #nav-primary > ul > li > a {
     width: 120px; }
 
@@ -106,8 +147,35 @@ nav {
   #nav-secondary > ul > li > a {
     width: 320px; }
 
-.fieldset {
-  padding: 20px; }
+.popup {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 400px;
+  min-height: calc(100vh - 20px);
+  margin: 0;
+  margin-left: -200px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 20px 10px rgba(0, 0, 0, 0.1); }
+  .popup .popup__title {
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: 5px 5px 0 0;
+    background: #af75c4;
+    color: #fff;
+    width: 100%;
+    height: 31px; }
+  .popup .popup__close {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 8px 14px;
+    color: #fff;
+    font-weight: bold; }
+  .popup .popup__content {
+    padding: 10px 20px; }
 
 .field {
   list-style: none;
